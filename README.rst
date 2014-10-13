@@ -338,20 +338,24 @@ generate cryptographic keys, and manage a TUF repository.
 
 __ https://github.com/theupdateframework/tuf/tree/develop/tuf#repository-management
 
-Package managers like pip need to ship the repository's root keys (i.e.,
-"root.json", which is signed by the root role) with the installation files that
-users initially download.  For example, "root.json" can be included in the
+Package managers like pip need to ship a file called "root.json" with the installation files that
+users initially download.  This includes information about the keys trusted for
+certain roles, as well as the root keys themselves.   Any new version
+of "root.json" that clients may download are verified against the root keys
+that client's initially trust.  If a root key is compromised, but a threshold of keys are still secured,
+the PyPI administrator must push a new release that revokes trust in the compromised keys.
+If a threshold of root keys are compromised, then "root.json" should be updated out-of-band, 
+however the threshold should
+be chosen so that this is extremely unlikely.  The TUF client library does
+not require manual intervention if root keys are revoked or added: the update
+process handles the cases where "root.json" has changed.
+
+To bundle the software, "root.json" must be included in the
 version of pip shipped with CPython (via ensurepip).  The TUF client library
 then loads the root metadata and downloads the rest of the roles, including
 updating "root.json" if it has changed.  An `outline of the update process`__
 is available.
 
-Note: The public keys of root are also listed in "root.json".  Any new version
-of "root.json" that clients may download are verified against the root keys
-that client's initially trust.  If a threshold of root keys are compromised,
-then "root.json" should be updated out-of-band.  The TUF client library does
-not require manual intervention if root keys are revoked or added: the update
-process handles the cases where "root.json" has changed.
 
 __ https://github.com/theupdateframework/tuf/tree/develop/tuf/client#overview-of-the-update-process.
 
